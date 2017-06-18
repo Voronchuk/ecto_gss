@@ -1,4 +1,5 @@
 /_build
+/config/service_account.json
 /cover
 /deps
 erl_crash.dump
