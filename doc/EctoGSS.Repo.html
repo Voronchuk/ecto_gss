@@ -1,0 +1,638 @@
+    <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.16.1">
+    <title>EctoGSS.Repo – ecto_gss v0.1.0</title>
+    <link rel="stylesheet" href="dist/app-4ecae1abb8.css" />
+    
+    <script src="dist/sidebar_items-877307bb2c.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+
+    <div class="main">
+<button class="sidebar-toggle">
+  <span class="icon-menu" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Sidebar</span>
+</button>
+<section class="sidebar">
+
+  
+  <a href="api-reference.html" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+        ecto_gss
+      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.1.0
+      </h2>
+    </div>
+    
+  </a>
+
+  <div class="sidebar-search">
+    <span class="icon-search" aria-hidden="true"></span>
+    <input type="text" class="sidebar-searchInput" placeholder="search" aria-label="Search" autocomplete="off" />
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+    
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+    
+
+    
+      <li><a id="exceptions-list" href="#full-list">Exceptions</a></li>
+    
+
+    
+
+    
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="visible-xs">ecto_gss v0.1.0</small>
+        EctoGSS.Repo
+        
+      </h1>
+
+      
+        <section id="moduledoc">
+          <p>Repository to use Google Spreadsheets as persistence layer for objects.</p>
+
+        </section>
+      
+
+      
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+          
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+    <div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:ecto_object/0">ecto_object()</a>
+  </div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:result/0">result()</a>
+  </div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:state/0">state()</a>
+  </div>
+  
+    <div class="summary-synopsis"></div>
+  
+</div>
+
+  </div>
+
+
+          
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+    <div class="summary-row">
+  <div class="summary-signature">
+    <a href="#all/2">all(schema, opts \\ [])</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Get several records</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete/1">delete(record)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Delete an existing record</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete!/1">delete!(record)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Delete an existing record, raise in case of error</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get/2">get(schema, id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Get a record by row id, raise if not found</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get!/2">get!(schema, id)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Get a record by row, raise if not found</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insert/1">insert(changeset)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Add a new record</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insert!/1">insert!(changeset)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Add a new record, raise in case of error</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insert_or_update/1">insert_or_update(changeset)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Update an existing record, or insert a new one</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insert_or_update!/1">insert_or_update!(changeset)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Update an existing record, or insert a new one, raise in case of error</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/0">start_link()</a>
+  </div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update/1">update(changeset)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Update an existing record with a row id</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update!/1">update!(changeset)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>Update an existing record, raise in case of error</p>
+</div>
+  
+</div>
+
+  </div>
+
+
+          
+
+        </section>
+      
+
+      
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Types
+          </h1>
+          <div class="types-list">
+            <div class="detail" id="t:ecto_object/0">
+  
+  <div class="detail-header">
+    <a href="#t:ecto_object/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <span class="signature">ecto_object()</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>ecto_object() :: <a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a> | <a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Schema.html#t:t/0">Ecto.Schema.t</a></pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    
+  </section>
+</div>
+<div class="detail" id="t:result/0">
+  
+  <div class="detail-header">
+    <a href="#t:result/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <span class="signature">result()</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>result() :: {:ok, <a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Schema.html#t:t/0">Ecto.Schema.t</a>} | {:error, <a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    
+  </section>
+</div>
+<div class="detail" id="t:state/0">
+  
+  <div class="detail-header">
+    <a href="#t:state/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <span class="signature">state()</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>state() :: map</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    
+  </section>
+</div>
+
+          </div>
+        </section>
+      
+
+      
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Functions
+          </h1>
+          <div class="detail" id="all/2">
+  
+    <span id="all/1"></span>
+  
+  <div class="detail-header">
+    <a href="#all/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">all(schema, opts \\ [])</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>all(<a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Queryable.html#t:t/0">Ecto.Queryable.t</a>, <a href="https://hexdocs.pm/elixir/Keyword.html#t:t/0">Keyword.t</a>) :: [<a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Schema.html#t:t/0">Ecto.Schema.t</a>]</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Get several records:</p>
+<ul>
+<li>by range of rows: <code class="inline">start_id</code> and <code class="inline">end_id</code> options;
+</li>
+<li>by exact list of rows: <code class="inline">rows</code> option.
+</li>
+</ul>
+
+  </section>
+</div>
+<div class="detail" id="delete/1">
+  
+  <div class="detail-header">
+    <a href="#delete/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">delete(record)</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete(<a href="#t:ecto_object/0">ecto_object</a>) :: <a href="#t:result/0">result</a></pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Delete an existing record.</p>
+
+  </section>
+</div>
+<div class="detail" id="delete!/1">
+  
+  <div class="detail-header">
+    <a href="#delete!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">delete!(record)</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>delete!(<a href="#t:ecto_object/0">ecto_object</a>) :: <a href="#t:result/0">result</a> | no_return</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Delete an existing record, raise in case of error.</p>
+
+  </section>
+</div>
+<div class="detail" id="get/2">
+  
+  <div class="detail-header">
+    <a href="#get/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">get(schema, id)</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get(<a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Queryable.html#t:t/0">Ecto.Queryable.t</a>, integer) ::
+  <a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Schema.html#t:t/0">Ecto.Schema.t</a> |
+  nil |
+  no_return</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Get a record by row id, raise if not found.</p>
+
+  </section>
+</div>
+<div class="detail" id="get!/2">
+  
+  <div class="detail-header">
+    <a href="#get!/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">get!(schema, id)</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>get!(<a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Queryable.html#t:t/0">Ecto.Queryable.t</a>, integer) :: <a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Schema.html#t:t/0">Ecto.Schema.t</a> | no_return</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Get a record by row, raise if not found.</p>
+
+  </section>
+</div>
+<div class="detail" id="insert/1">
+  
+  <div class="detail-header">
+    <a href="#insert/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">insert(changeset)</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>insert(<a href="#t:ecto_object/0">ecto_object</a>) :: <a href="#t:result/0">result</a></pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Add a new record.</p>
+
+  </section>
+</div>
+<div class="detail" id="insert!/1">
+  
+  <div class="detail-header">
+    <a href="#insert!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">insert!(changeset)</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>insert!(<a href="#t:ecto_object/0">ecto_object</a>) :: <a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Schema.html#t:t/0">Ecto.Schema.t</a> | no_return</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Add a new record, raise in case of error.</p>
+
+  </section>
+</div>
+<div class="detail" id="insert_or_update/1">
+  
+  <div class="detail-header">
+    <a href="#insert_or_update/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">insert_or_update(changeset)</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>insert_or_update(<a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>) :: <a href="#t:result/0">result</a></pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Update an existing record, or insert a new one.</p>
+
+  </section>
+</div>
+<div class="detail" id="insert_or_update!/1">
+  
+  <div class="detail-header">
+    <a href="#insert_or_update!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">insert_or_update!(changeset)</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>insert_or_update!(<a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>) :: <a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Schema.html#t:t/0">Ecto.Schema.t</a> | no_return</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Update an existing record, or insert a new one, raise in case of error.</p>
+
+  </section>
+</div>
+<div class="detail" id="start_link/0">
+  
+  <div class="detail-header">
+    <a href="#start_link/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">start_link()</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>start_link() :: {:ok, pid}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    
+  </section>
+</div>
+<div class="detail" id="update/1">
+  
+  <div class="detail-header">
+    <a href="#update/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">update(changeset)</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>update(<a href="#t:ecto_object/0">ecto_object</a>) ::
+  {:ok, <a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Schema.html#t:t/0">Ecto.Schema.t</a>} |
+  {:error, <a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Update an existing record with a row id.</p>
+
+  </section>
+</div>
+<div class="detail" id="update!/1">
+  
+  <div class="detail-header">
+    <a href="#update!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <span class="signature">update!(changeset)</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>update!(<a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>) :: <a href="https://hexdocs.pm/ecto/2.0.6/Ecto.Schema.html#t:t/0">Ecto.Schema.t</a> | no_return</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    <p>Update an existing record, raise in case of error.</p>
+
+  </section>
+</div>
+
+        </section>
+      
+
+      
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.16.1),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+        <button class="night-mode-toggle"><span class="sr-only">Switch theme</span></button>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  <script src="dist/app-126b5f0e90.js"></script>
+  </body>
+</html>
+
