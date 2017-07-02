@@ -10,6 +10,9 @@ to set Google Spreadsheet access.
 2. Add `{:ecto_gss, "~> 0.1"}` to __mix.exs__ under `deps` function, add `:elixir_google_spreadsheets` in your application list.
 3. Run `mix deps.get && mix deps.compile`.
 
+# OTP 20
+Currently (01.07.2017) there is an issue in OTP 20, because `:crypto.mpint/1` was moved to another module and it's used in `:goth` dependency `:json_web_token`, you can use this temporary hack as a resolution, by adding this in your deps: `{:json_web_token, git: "https://github.com/starbuildr/json_web_token_ex.git", override: true}`
+
 # Usage
 Configure Ecto schema by a provided sample:
 
