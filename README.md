@@ -58,5 +58,4 @@ When you schema is properly defined, use `EctoGSS.Repo` to work with the support
 Banged operations are also available, check the hex docs for the full list of a supported operations.
 
 # Restrictions
-* It's up to you to honour all Google request quotas.
 * __This library is in it's early beta, use on your own risk. Pull requests / reports / feedback are welcome.__
