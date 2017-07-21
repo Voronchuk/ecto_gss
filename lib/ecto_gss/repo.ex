@@ -236,8 +236,8 @@ defmodule EctoGSS.Repo do
     end
 
     @spec from_spreadsheet_row_values(module(), [String.t], String.t) :: Ecto.Schema.t | nil
-    defp from_spreadsheet_row_values(schema, values, id) do
-        if Enum.join(values) == "" do
+    defp from_spreadsheet_row_values(schema, [head | _] = values, id) do
+        if Enum.join(values) == "" or head == "!!" do
             nil
         else
             @columns

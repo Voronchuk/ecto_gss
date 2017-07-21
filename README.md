@@ -41,6 +41,9 @@ Type for each schema column will be generated automatically, based on a provided
 
 Keep in mind that `:id` is used as a system field to store row index information, if you need secure identifier, it's recommended to add `:uid` column and generate it explicitly, for instance with [elixir-uuid](https://github.com/zyro/elixir-uuid) library.
 
+### Ignore rows
+All rows where the first column is equal to `!!` are ignored and considered comments.
+
 ## Repo
 When you schema is properly defined, use `EctoGSS.Repo` to work with the supported operations:
 
