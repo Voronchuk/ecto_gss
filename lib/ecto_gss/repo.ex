@@ -195,11 +195,11 @@ defmodule EctoGSS.Repo do
             {:ok, record}
         else
             :error ->
-                {:error, add_error(record, :id, "GSS connection error!")}
+                {:error, add_error(change(record, %{}), :id, "GSS connection error!")}
             :invalid_record ->
-                {:error, add_error(record, :id, "Invalid input record!")}
+                {:error, add_error(change(record, %{}), :id, "Invalid input record!")}
             _ ->
-                {:error, add_error(record, :id, "GSS delete error!")}
+                {:error, add_error(change(record, %{}), :id, "GSS delete error!")}
         end
     end
 
