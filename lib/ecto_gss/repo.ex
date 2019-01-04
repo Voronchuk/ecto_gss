@@ -2,7 +2,7 @@ defmodule EctoGSS.Repo do
     @moduledoc """
     Repository to use Google Spreadsheets as persistence layer for objects.
     """
-    
+
     use GenServer
     import Ecto.Changeset
     require Logger;
@@ -37,7 +37,7 @@ defmodule EctoGSS.Repo do
 
     @doc """
     Get several records:
-    
+
     * by range of rows: `start_id` and `end_id` options;
     * by exact list of rows: `rows` option.
     """
@@ -65,7 +65,7 @@ defmodule EctoGSS.Repo do
     @spec get(Ecto.Queryable.t, integer()) :: Ecto.Schema.t | nil | no_return
     def get(schema, id) do
         with {:ok, pid} <- get_spreadsheet_pid(schema),
-            index when index > 0 <- last_column_index(schema), 
+            index when index > 0 <- last_column_index(schema),
             {:ok, data} <- GSS.Spreadsheet.read_row(pid, id, column_to: index)
         do
             from_spreadsheet_row_values(schema, data, id)
@@ -88,7 +88,7 @@ defmodule EctoGSS.Repo do
         raise_if_no_results(schema, get(schema, id))
     end
 
-    
+
     @doc """
     Add a new record.
     """
@@ -243,13 +243,13 @@ defmodule EctoGSS.Repo do
             @columns
             |> Enum.zip(values)
             |> Enum.into(%{})
-            |> to_ecto_record(schema, id)    
+            |> to_ecto_record(schema, id)
         end
     end
- 
-    @spec to_ecto_record(map(), module(), integer()) :: Ecto.Schema.t 
+
+    @spec to_ecto_record(map(), module(), integer()) :: Ecto.Schema.t
     defp to_ecto_record(letter_map_values, schema, id) do
-        instruction = schema.__schema__(:types)
+        instruction = get_schema_fields_types(schema)
         Enum.reduce instruction, struct(schema), fn({key, maybe_column_type}, record) ->
             cond do
                 key == :id ->
@@ -277,7 +277,7 @@ defmodule EctoGSS.Repo do
 
     @spec letter_map_values(Ecto.Schema.t) :: map()
     defp letter_map_values(%{__struct__: model} = record) do
-        instruction = model.__schema__(:types)
+        instruction = get_schema_fields_types(model)
         Enum.reduce instruction, %{}, fn({key, maybe_column_type}, acc) ->
             cond do
                 is_gss_schema_type_module?(maybe_column_type) ->
@@ -302,12 +302,12 @@ defmodule EctoGSS.Repo do
 
     @spec last_column_index(module()) :: integer()
     defp last_column_index(model) do
-        instruction = model.__schema__(:types)
+        instruction = get_schema_fields_types(model)
         index = Enum.reduce instruction, 0, fn({_key, maybe_column_type}, old_index) ->
             cond do
                 is_gss_schema_type_module?(maybe_column_type) ->
                     column_letter = maybe_column_type.column()
-                    current_index = Enum.find_index @columns, fn(letter) -> 
+                    current_index = Enum.find_index @columns, fn(letter) ->
                         letter == column_letter
                     end
 
@@ -430,6 +430,14 @@ defmodule EctoGSS.Repo do
             Enum.reduce(opts, msg, fn {key, value}, _acc ->
                 String.replace(msg, "%{#{key}}", to_string(value))
             end)
+        end)
+    end
+
+    # Get types for all schema fields
+    @spec get_schema_fields_types(module()) :: [{atom(), atom()}]
+    defp get_schema_fields_types(schema) do
+        Enum.map(schema.__schema__(:fields), fn field ->
+            {field, schema.__schema__(:type, field)}
         end)
     end
 end
