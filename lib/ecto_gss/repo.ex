@@ -400,12 +400,12 @@ defmodule EctoGSS.Repo do
 
   @spec spreadsheet(Ecto.Changeset.t()) :: String.t()
   defp spreadsheet(%Ecto.Changeset{data: data}) do
-    data.__struct__.spreadsheet()
+    data.__struct__.spreadsheet() || data.__struct__(:prefix)
   end
 
   @spec list(Ecto.Changeset.t()) :: String.t()
   defp list(%Ecto.Changeset{data: data}) do
-    data.__struct__.list()
+    data.__struct__.list() || data.__struct__(:source)
   end
 
   @spec is_gss_schema_module?(module()) :: boolean()

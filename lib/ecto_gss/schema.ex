@@ -1,7 +1,7 @@
 defmodule EctoGSS.Schema do
   def model(opts) do
-    spreadsheet = Keyword.fetch!(opts, :spreadsheet)
-    list = Keyword.fetch!(opts, :list)
+    spreadsheet = Keyword.get(opts, :spreadsheet)
+    list = Keyword.get(opts, :list)
 
     for gss_column <- Keyword.get(opts, :columns, []) do
       code =

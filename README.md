@@ -17,21 +17,21 @@ Configure Ecto schema by a provided sample:
 defmodule Account do
     use EctoGSS.Schema, {
         :model,
-        columns: ["A", "Y"],
-        list: "List3",
-        spreadsheet: "1h85keViqbRzgTN245gEw5s9roxpaUtT7i-mNXQtT8qQ"
+        columns: ["A", "Y"]
     }
     use Ecto.Schema
 
-    schema "accounts" do
+    @schema_prefix "1h85keViqbRzgTN245gEw5s9roxpaUtT7i-mNXQtT8qQ"
+
+    schema "List3" do
         field :nickname, EctoGSS.Schema.List3.A
         field :email, EctoGSS.Schema.List3.Y
     end
 end
 ```
 
-* `spreadsheet` is an id of Google spreadsheet which is used as storage file;
-* `list` is the name of spreadsheet list where values will be stored (tested only with latin and numeric names);
+* `spreadsheet` is an id of Google spreadsheet which is used as storage file, can be passed as `@schema_prefix`;
+* `list` is the name of spreadsheet list where values will be stored (tested only with latin and numeric names), can be passed as schema name;
 * `columns` are the list of Google spreadsheet columns which are used to map a schema values;
 
 Type for each schema column will be generated automatically, based on a provided config values, in a format like `EctoGSS.Schema.[LIST].[COLUMN]`.
