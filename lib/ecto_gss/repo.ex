@@ -60,21 +60,21 @@ defmodule EctoGSS.Repo do
   * by range of rows: `start_id` and `end_id` options;
   * by exact list of rows: `rows` option.
   """
-  @spec all(Ecto.Queryable.t(), Keyword.t()) :: [Ecto.Schema.t()]
-  def all(schema, opts \\ []) do
+  @spec all(Ecto.Queryable.t(), Keyword.t()) :: [Ecto.Schema.t()] | no_return
+  def all(schema, opts \\ []) when is_atom(schema) do
     with {:ok, pid} <- get_spreadsheet_pid(schema),
          index when index > 0 <- last_column_index(schema),
          {response_format, {:ok, data}} <- rows_by_params(pid, index, opts) do
       response_values_by_opts(response_format, schema, data, opts)
     else
-      :error ->
-        raise EctoGSS.NoSpreadsheetPid, message: "no pid"
-
       :invalid_record ->
         raise EctoGSS.NotSchema, message: "not a schema in first param"
 
+      :error ->
+        raise EctoGSS.NoSpreadsheetPid, message: "no pid"
+
       _ ->
-        nil
+        []
     end
   end
 
@@ -82,17 +82,17 @@ defmodule EctoGSS.Repo do
   Get a record by row id, raise if not found.
   """
   @spec get(Ecto.Queryable.t(), integer()) :: Ecto.Schema.t() | nil | no_return
-  def get(schema, id) do
+  def get(schema, id) when is_atom(schema) do
     with {:ok, pid} <- get_spreadsheet_pid(schema),
          index when index > 0 <- last_column_index(schema),
          {:ok, data} <- GSS.Spreadsheet.read_row(pid, id, column_to: index) do
       from_spreadsheet_row_values(schema, data, id)
     else
-      :error ->
-        raise EctoGSS.NoSpreadsheetPid, message: "no pid"
-
       :invalid_record ->
         raise EctoGSS.NotSchema, message: "not a schema in first param"
+
+      :error ->
+        raise EctoGSS.NoSpreadsheetPid, message: "no pid"
 
       _ ->
         nil
@@ -102,10 +102,10 @@ defmodule EctoGSS.Repo do
   @doc """
   Get a record by row, raise if not found.
   """
-  @spec get!(Ecto.Queryable.t(), integer()) :: Ecto.Schema.t() | no_return
-  def get!(_schema, nil), do: raise(%Ecto.NoResultsError{message: "no results found"})
+  @spec get!(Ecto.Queryable.t(), integer() | nil) :: Ecto.Schema.t() | no_return
+  def get!(_schema, nil), do: raise Ecto.NoResultsError, message: "no results found"
 
-  def get!(schema, id) do
+  def get!(schema, id) when is_atom(schema) do
     raise_if_no_results(schema, get(schema, id))
   end
 
@@ -118,6 +118,7 @@ defmodule EctoGSS.Repo do
          object = apply_changes(changeset),
          row_values = spreadsheet_row_values(object),
          id = get_inc_row(pid),
+         IO.inspect(row_values),
          :ok <- GSS.Spreadsheet.append_row(pid, id, row_values) do
       {:ok, Map.put(object, :id, id)}
     else
@@ -137,7 +138,7 @@ defmodule EctoGSS.Repo do
   def insert(%{__struct__: _model} = object) do
     object
     |> change(%{})
-    |> insert
+    |> insert()
   end
 
   @doc """
@@ -145,7 +146,9 @@ defmodule EctoGSS.Repo do
   """
   @spec insert!(ecto_object) :: Ecto.Schema.t() | no_return
   def insert!(changeset) do
-    raise_if_changeset_errors(insert(changeset), "insert")
+    changeset
+    |> insert()
+    |> raise_if_changeset_errors("insert")
   end
 
   @doc """
@@ -177,7 +180,9 @@ defmodule EctoGSS.Repo do
   """
   @spec update!(Ecto.Changeset.t()) :: Ecto.Schema.t() | no_return
   def update!(%Ecto.Changeset{} = changeset) do
-    raise_if_changeset_errors(update(changeset), "update")
+    changeset
+    |> update()
+    |> raise_if_changeset_errors("update")
   end
 
   @doc """
@@ -202,7 +207,9 @@ defmodule EctoGSS.Repo do
   """
   @spec insert_or_update!(Ecto.Changeset.t()) :: Ecto.Schema.t() | no_return
   def insert_or_update!(changeset) do
-    raise_if_changeset_errors(insert_or_update(changeset), "upsert")
+    changeset
+    |> insert_or_update()
+    |> raise_if_changeset_errors("upsert")
   end
 
   @doc """
@@ -232,9 +239,11 @@ defmodule EctoGSS.Repo do
   @doc """
   Delete an existing record, raise in case of error.
   """
-  @spec delete!(ecto_object) :: result | no_return
+  @spec delete!(ecto_object) :: Ecto.Schema.t | no_return
   def delete!(record) do
-    raise_if_changeset_errors(delete(record), "delete")
+    record
+    |> delete()
+    |> raise_if_changeset_errors("delete")
   end
 
   @spec response_values_by_opts(:rows | :range, module(), [map()], Keyword.t()) :: [
@@ -263,7 +272,7 @@ defmodule EctoGSS.Repo do
     end
   end
 
-  @spec from_spreadsheet_row_values(module(), [String.t()], String.t()) :: Ecto.Schema.t() | nil
+  @spec from_spreadsheet_row_values(module(), [String.t()], String.t() | integer()) :: Ecto.Schema.t() | nil
   defp from_spreadsheet_row_values(schema, [head | _] = values, id) do
     if Enum.join(values) == "" or head == "!!" do
       nil
@@ -360,12 +369,12 @@ defmodule EctoGSS.Repo do
     index + 1
   end
 
-  @spec get_spreadsheet_pid(Ecto.Changeset.t()) :: {:ok, pid()} | :error | :invalid_record
+  @spec get_spreadsheet_pid(Ecto.Changeset.t() | module()) :: {:ok, pid()} | :error | :invalid_record
   defp get_spreadsheet_pid(%Ecto.Changeset{} = record) do
     get_spreadsheet_pid(spreadsheet(record), list(record))
   end
 
-  defp get_spreadsheet_pid(schema) do
+  defp get_spreadsheet_pid(schema) when is_atom(schema) do
     if is_gss_schema_module?(schema) do
       get_spreadsheet_pid(schema.spreadsheet(), schema.list())
     else
@@ -436,7 +445,7 @@ defmodule EctoGSS.Repo do
   end
 
   # Raise Ecto.NoResultsError if there is no results
-  @spec raise_if_no_results(module(), Ecto.Schema.t()) :: Ecto.Schema.t() | no_return
+  @spec raise_if_no_results(module(), Ecto.Schema.t() | nil) :: Ecto.Schema.t() | no_return
   defp raise_if_no_results(schema, result) do
     case result do
       nil -> raise Ecto.NoResultsError.exception(queryable: schema)
@@ -458,14 +467,11 @@ defmodule EctoGSS.Repo do
         end)
 
         raise Ecto.InvalidChangesetError, action: action, changeset: changeset
-
-      _ ->
-        raise Ecto.InvalidChangesetError, action: action
     end
   end
 
   # Convert all changeset errors into a single string value.
-  @spec changeset_errors_to_string(Ecto.Changeset.t()) :: String.t()
+  @spec changeset_errors_to_string(Ecto.Changeset.t()) :: map()
   defp changeset_errors_to_string(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
       Enum.reduce(opts, msg, fn {key, value}, _acc ->
