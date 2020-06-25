@@ -23,8 +23,10 @@ defmodule EctoGSS.Schema do
           def gss_schema_type, do: true
         end
 
+      safe_list_name = String.replace(list, " ", "")
+
       Module.create(
-        Module.concat(EctoGSS.Schema, "#{list}.#{gss_column}"),
+        Module.concat(EctoGSS.Schema, "#{safe_list_name}.#{gss_column}"),
         code,
         Macro.Env.location(__ENV__)
       )
