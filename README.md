@@ -7,7 +7,7 @@ which relies on __Google Cloud API v4__ and uses __Google Service Accounts__ to 
 # Setup
 1. Use elixir_google_spreadsheets [setup instructions](https://github.com/Voronchuk/elixir_google_spreadsheets)
 to set Google Spreadsheet access.
-2. Add `{:ecto_gss, "~> 0.2"}` to __mix.exs__ under `deps` function, add `:elixir_google_spreadsheets` in your application list.
+2. Add `{:ecto_gss, "~> 0.3"}` to __mix.exs__ under `deps` function (may also need to add `:elixir_google_spreadsheets` in your extra_applications list).
 3. Run `mix deps.get && mix deps.compile`.
 
 # Usage

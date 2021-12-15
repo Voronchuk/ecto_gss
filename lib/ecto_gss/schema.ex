@@ -9,6 +9,11 @@ defmodule EctoGSS.Schema do
           @behaviour Ecto.Type
           def type, do: :string
 
+          def embed_as(_format), do: :self
+
+          def equal?(value1, value1), do: true
+          def equal?(_value1, _value2), do: false
+
           def cast(integer) when is_integer(integer), do: {:ok, to_string(integer)}
           def cast(string) when is_bitstring(string), do: {:ok, string}
           def cast(_), do: :error
