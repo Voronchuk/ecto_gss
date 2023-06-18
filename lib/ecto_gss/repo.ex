@@ -118,7 +118,6 @@ defmodule EctoGSS.Repo do
          object = apply_changes(changeset),
          row_values = spreadsheet_row_values(object),
          id = get_inc_row(pid),
-         IO.inspect(row_values),
          :ok <- GSS.Spreadsheet.append_row(pid, id, row_values) do
       {:ok, Map.put(object, :id, id)}
     else

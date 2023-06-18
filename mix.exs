@@ -4,8 +4,8 @@ defmodule EctoGss.Mixfile do
   def project do
     [
       app: :ecto_gss,
-      version: "0.3.2",
-      elixir: "~> 1.12",
+      version: "0.3.3",
+      elixir: "~> 1.14",
       description: "Use Google Spreadsheets as storage for Ecto objects.",
       docs: [extras: ["README.md"]],
       build_embedded: Mix.env() == :prod,
@@ -36,8 +36,8 @@ defmodule EctoGss.Mixfile do
 
   defp deps do
     [
-      {:elixir_google_spreadsheets, "~> 0.2"},
-      {:ecto, "~> 3.7"},
+      {:elixir_google_spreadsheets, "~> 0.3"},
+      {:ecto, "~> 3.10"},
       {:earmark, ">= 0.0.0", only: :dev},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
     ]
