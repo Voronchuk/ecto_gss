@@ -4,7 +4,7 @@ defmodule EctoGss.Mixfile do
   def project do
     [
       app: :ecto_gss,
-      version: "0.3.3",
+      version: "0.3.4",
       elixir: "~> 1.14",
       description: "Use Google Spreadsheets as storage for Ecto objects.",
       docs: [extras: ["README.md"]],
