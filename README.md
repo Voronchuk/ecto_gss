@@ -1,58 +1,132 @@
-# EctoGss
-Elixir library to persist Ecto records and changesets in Google Spreadsheets.
+# EctoGSS
 
-This library is based on [elixir_google_spreadsheets](https://github.com/Voronchuk/elixir_google_spreadsheets) on a transport layer,
-which relies on __Google Cloud API v4__ and uses __Google Service Accounts__ to manage it's content.
+Ecto-style objects backed by rows in a Google Spreadsheet, built on top of
+[elixir_google_spreadsheets](https://github.com/Voronchuk/elixir_google_spreadsheets), which talks
+to the Google Sheets API v4 via a Service Account.
 
 # Setup
-1. Use elixir_google_spreadsheets [setup instructions](https://github.com/Voronchuk/elixir_google_spreadsheets)
-to set Google Spreadsheet access.
-2. Add `{:ecto_gss, "~> 0.3"}` to __mix.exs__ under `deps` function (may also need to add `:elixir_google_spreadsheets` in your extra_applications list).
-3. Run `mix deps.get && mix deps.compile`.
+
+> **Upgrading to v1.0:** requires Elixir >= 1.18 and `elixir_google_spreadsheets ~> 1.0`.
+> Authentication is now configured through gss's runtime-read keys — see [Authentication
+> options](https://github.com/Voronchuk/elixir_google_spreadsheets#authentication-options) below.
+> `EctoGSS.Repo` is no longer a GenServer; remove it from your supervision tree if you had it
+> there. The unused `EctoGss` module was removed. The `@schema_prefix` style now actually works
+> (it previously crashed).
+
+1. Follow [elixir_google_spreadsheets' setup
+   steps](https://github.com/Voronchuk/elixir_google_spreadsheets#setup) to create a Google
+   Service Account and share your spreadsheet with it.
+2. Add `{:ecto_gss, "~> 1.0"}` to `mix.exs` under `deps`. This pulls in `elixir_google_spreadsheets
+   ~> 1.0` transitively — dependency applications start automatically, so there's no need to add
+   `:elixir_google_spreadsheets` to `extra_applications` anymore.
+3. Point `elixir_google_spreadsheets` at your credentials. A bearer token is resolved at request
+   time from the first configured source, in order: `token_generator` → `goth` → `source` →
+   `json` — see [Authentication
+   options](https://github.com/Voronchuk/elixir_google_spreadsheets#authentication-options) for
+   the full list. A minimal example using the `json:` path, loaded at runtime so the key isn't
+   baked into a release:
+
+    ```elixir
+    # config/runtime.exs
+    config :elixir_google_spreadsheets,
+      json: File.read!(System.fetch_env!("GOOGLE_SERVICE_ACCOUNT_JSON_PATH"))
+    ```
+
+4. Run `mix deps.get && mix deps.compile`.
+
+Quota alignment (60 read + 60 write requests/min/user) and automatic retry on `429` are inherited
+from `elixir_google_spreadsheets` 1.0 — no `:client` tuning is needed.
 
 # Usage
-Configure Ecto schema by a provided sample:
 
-```
-defmodule Account do
-    use EctoGSS.Schema, {
-        :model,
-        columns: ["A", "Y"]
-    }
-    use Ecto.Schema
+Pair `use EctoGSS.Schema, {:model, opts}` with `use Ecto.Schema` to back an Ecto schema with a
+spreadsheet list (tab). There are two ways to tell `EctoGSS.Repo` which spreadsheet to use.
 
-    @schema_prefix "1h85keViqbRzgTN245gEw5s9roxpaUtT7i-mNXQtT8qQ"
+### Explicit `spreadsheet:`
 
-    schema "List3" do
-        field :nickname, EctoGSS.Schema.List3.A
-        field :email, EctoGSS.Schema.List3.Y
-    end
+```elixir
+defmodule MyApp.Account do
+  use EctoGSS.Schema, {
+    :model,
+    columns: ["A", "Y"],
+    list: "List3",
+    spreadsheet: "1h85keViqbRzgTN245gEw5s9roxpaUtT7i-mNXQtT8qQ"
+  }
+
+  use Ecto.Schema
+
+  schema "accounts" do
+    field(:nickname, EctoGSS.Schema.List3.A)
+    field(:email, EctoGSS.Schema.List3.Y)
+  end
 end
 ```
 
-* `spreadsheet` is an id of Google spreadsheet which is used as storage file, can be passed as `@schema_prefix`;
-* `list` is the name of spreadsheet list where values will be stored (tested only with latin and numeric names), can be passed as schema name;
-* `columns` are the list of Google spreadsheet columns which are used to map a schema values;
+### `@schema_prefix`
 
-Type for each schema column will be generated automatically, based on a provided config values, in a format like `EctoGSS.Schema.[LIST].[COLUMN]`.
+Omit `spreadsheet:` and supply the spreadsheet id via `@schema_prefix` instead —
+`EctoGSS.Repo` falls back to it whenever `spreadsheet/0` returns `nil`:
 
-Keep in mind that `:id` is used as a system field to store row index information, if you need secure identifier, it's recommended to add `:uid` column and generate it explicitly, for instance with [elixir-uuid](https://github.com/zyro/elixir-uuid) library.
+```elixir
+defmodule MyApp.Account do
+  use EctoGSS.Schema, {
+    :model,
+    columns: ["A", "Y"],
+    list: "List3"
+  }
 
-### Ignore rows
-All rows where the first column is equal to `!!` are ignored and considered comments.
+  use Ecto.Schema
+
+  @schema_prefix "1h85keViqbRzgTN245gEw5s9roxpaUtT7i-mNXQtT8qQ"
+  schema "accounts" do
+    field(:nickname, EctoGSS.Schema.List3.A)
+    field(:email, EctoGSS.Schema.List3.Y)
+  end
+end
+```
+
+> `list:` is always required — it names the generated column type modules
+> (`EctoGSS.Schema.<List>.<Column>`) — and, like `columns:`, must be a compile-time literal.
+> `spreadsheet:` may be any expression (a module attribute, a function call, etc.), which is why
+> it's the one that can be supplied via `@schema_prefix` instead.
+
+`:id` is not a spreadsheet column: it's populated from the row index. Rows whose first column is
+`"!!"` are treated as comments and skipped by both `get/2` and `all/2`.
 
 ## Repo
-When you schema is properly defined, use `EctoGSS.Repo` to work with the supported operations:
 
-* `EctoGSS.Repo.get(Account, id)`
-* `EctoGSS.Repo.all(Account, start_id: 5, end_id: 10)`
-* `EctoGSS.Repo.all(Account, rows: [1, 3, 5])`
-* `EctoGSS.Repo.insert(changeset)`
-* `EctoGSS.Repo.update(changeset)`
-* `EctoGSS.Repo.insert_or_update(changeset)`
-* `EctoGSS.Repo.delete(record)`
+Once a schema is defined, `EctoGSS.Repo` provides the usual Ecto-like operations:
 
-Banged operations are also available, check the hex docs for the full list of a supported operations.
+* `EctoGSS.Repo.get(Account, id)` / `get!(Account, id)`
+* `EctoGSS.Repo.all(Account, start_id: 1, end_id: 100)` — contiguous range of rows
+* `EctoGSS.Repo.all(Account, rows: [1, 3, 5])` — exact list of rows
+* `EctoGSS.Repo.insert(changeset)` / `insert!(changeset)`
+* `EctoGSS.Repo.update(changeset)` / `update!(changeset)`
+* `EctoGSS.Repo.insert_or_update(changeset)` / `insert_or_update!(changeset)`
+* `EctoGSS.Repo.delete(record)` / `delete!(record)`
 
 # Restrictions
-* __This library is in it's early beta, use on your own risk. Pull requests / reports / feedback are welcome.__
+
+* Columns are limited to `A`-`Z` (26 max) per schema.
+* Each schema maps to exactly one worksheet (list/tab).
+
+# Testing
+
+`mix test` runs the whole suite offline and keyless, against a local stub HTTP server.
+
+Tests that hit the real Google Sheets API are tagged `:integration` and excluded by default:
+
+```sh
+mix test --include integration
+```
+
+This needs a `config/test.local.exs` (gitignored) with real credentials:
+
+```elixir
+config :elixir_google_spreadsheets,
+  token_generator: nil,
+  json: File.read!("./config/service_account.json")
+```
+
+Point the suite at your own copy of the test spreadsheet with the `GSS_TEST_SPREADSHEET_ID`
+environment variable.
