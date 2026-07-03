@@ -103,7 +103,7 @@ defmodule EctoGSS.Repo do
   Get a record by row, raise if not found.
   """
   @spec get!(Ecto.Queryable.t(), integer() | nil) :: Ecto.Schema.t() | no_return
-  def get!(_schema, nil), do: raise Ecto.NoResultsError, message: "no results found"
+  def get!(_schema, nil), do: raise(Ecto.NoResultsError, message: "no results found")
 
   def get!(schema, id) when is_atom(schema) do
     raise_if_no_results(schema, get(schema, id))

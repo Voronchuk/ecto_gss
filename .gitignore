@@ -1,8 +1,10 @@
 /doc
 /_build
 /config/service_account.json
+/config/*.local.exs
 /cover
 /deps
+/priv/plts/
 erl_crash.dump
 *.ez
 *.beam

@@ -1,12 +1,18 @@
-defmodule EctoGss.RepoTest do
+defmodule EctoGSS.RepoLiveTest do
   use ExUnit.Case, async: true
 
+  @moduletag :integration
+
   defmodule Account do
+    # EctoGSS.Schema.model/1 only `unquote`s `spreadsheet:` into the generated code, so it
+    # can safely come from a module attribute (resolved at Account's own compile time).
+    # `list:` and `columns:` are consumed directly by Keyword.get/2 at macro-expansion time
+    # (they name the generated modules), so they MUST remain literals.
+    @spreadsheet_id Application.compile_env!(:ecto_gss, :spreadsheet_id)
+
     use EctoGSS.Schema, {
       :model,
-      columns: ["A", "Y"],
-      list: "List3",
-      spreadsheet: "1h85keViqbRzgTN245gEw5s9roxpaUtT7i-mNXQtT8qQ"
+      columns: ["A", "Y"], list: "List3", spreadsheet: @spreadsheet_id
     }
 
     use Ecto.Schema
