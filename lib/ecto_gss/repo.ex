@@ -222,7 +222,7 @@ defmodule EctoGSS.Repo do
   @doc """
   Delete an existing record, raise in case of error.
   """
-  @spec delete!(ecto_object) :: Ecto.Schema.t | no_return
+  @spec delete!(ecto_object) :: Ecto.Schema.t() | no_return
   def delete!(record) do
     record
     |> delete()
@@ -255,7 +255,8 @@ defmodule EctoGSS.Repo do
     end
   end
 
-  @spec from_spreadsheet_row_values(module(), [String.t()], String.t() | integer()) :: Ecto.Schema.t() | nil
+  @spec from_spreadsheet_row_values(module(), [String.t()], String.t() | integer()) ::
+          Ecto.Schema.t() | nil
   defp from_spreadsheet_row_values(schema, [head | _] = values, id) do
     if Enum.join(values) == "" or head == "!!" do
       nil
@@ -352,7 +353,8 @@ defmodule EctoGSS.Repo do
     index + 1
   end
 
-  @spec get_spreadsheet_pid(Ecto.Changeset.t() | module()) :: {:ok, pid()} | :error | :invalid_record
+  @spec get_spreadsheet_pid(Ecto.Changeset.t() | module()) ::
+          {:ok, pid()} | :error | :invalid_record
   defp get_spreadsheet_pid(%Ecto.Changeset{} = record) do
     get_spreadsheet_pid(spreadsheet(record), list(record))
   end
