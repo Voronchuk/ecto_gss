@@ -359,11 +359,14 @@ defmodule EctoGSS.Repo do
 
   defp get_spreadsheet_pid(schema) when is_atom(schema) do
     if gss_schema_module?(schema) do
-      get_spreadsheet_pid(schema.spreadsheet(), schema.list())
+      get_spreadsheet_pid(resolve_spreadsheet(schema), resolve_list(schema))
     else
       :invalid_record
     end
   end
+
+  defp get_spreadsheet_pid(sheet_id, list_name) when is_nil(sheet_id) or is_nil(list_name),
+    do: :error
 
   defp get_spreadsheet_pid(sheet_id, list_name)
        when is_bitstring(sheet_id) and is_bitstring(list_name) do
@@ -390,15 +393,26 @@ defmodule EctoGSS.Repo do
     end
   end
 
-  @spec spreadsheet(Ecto.Changeset.t()) :: String.t()
-  defp spreadsheet(%Ecto.Changeset{data: data}) do
-    data.__struct__.spreadsheet() || data.__struct__(:prefix)
+  @spec spreadsheet(Ecto.Changeset.t()) :: String.t() | nil
+  defp spreadsheet(%Ecto.Changeset{data: %{__struct__: schema}}) do
+    resolve_spreadsheet(schema)
   end
 
-  @spec list(Ecto.Changeset.t()) :: String.t()
-  defp list(%Ecto.Changeset{data: data}) do
-    data.__struct__.list() || data.__struct__(:source)
+  @spec list(Ecto.Changeset.t()) :: String.t() | nil
+  defp list(%Ecto.Changeset{data: %{__struct__: schema}}) do
+    resolve_list(schema)
   end
+
+  # Resolve a GSS schema module's spreadsheet id, falling back to `@schema_prefix`
+  # (surfaced via `__schema__(:prefix)`) when `spreadsheet:` was omitted at `use
+  # EctoGSS.Schema` time.
+  @spec resolve_spreadsheet(module()) :: String.t() | nil
+  defp resolve_spreadsheet(schema), do: schema.spreadsheet() || schema.__schema__(:prefix)
+
+  # Resolve a GSS schema module's list name, falling back to the Ecto schema's
+  # `source` (the string passed to `schema/2`) when `list:` was omitted.
+  @spec resolve_list(module()) :: String.t() | nil
+  defp resolve_list(schema), do: schema.list() || schema.__schema__(:source)
 
   @spec gss_schema_module?(module()) :: boolean()
   defp gss_schema_module?(schema) do

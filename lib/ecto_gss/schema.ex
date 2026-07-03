@@ -54,7 +54,14 @@ defmodule EctoGSS.Schema do
 
   def model(opts) do
     spreadsheet = Keyword.get(opts, :spreadsheet)
-    list = Keyword.get(opts, :list)
+
+    list =
+      Keyword.get(opts, :list) ||
+        raise(
+          ArgumentError,
+          "EctoGSS.Schema requires a :list option (it names the generated column type modules); " <>
+            "only :spreadsheet may be omitted (falls back to @schema_prefix)"
+        )
 
     for gss_column <- Keyword.get(opts, :columns, []) do
       code =
