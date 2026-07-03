@@ -14,8 +14,7 @@ defmodule EctoGSS.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
       dialyzer: [
-        plt_file: {:no_warn, "priv/plts/project.plt"},
-        ignore_warnings: ".dialyzer_ignore.exs"
+        plt_file: {:no_warn, "priv/plts/project.plt"}
       ]
     ]
   end
