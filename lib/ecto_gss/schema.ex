@@ -39,9 +39,11 @@ defmodule EctoGSS.Schema do
 
     * pass `spreadsheet:` (and `list:`) explicitly in `opts`, as shown above; or
     * omit `spreadsheet:` and instead rely on the host schema's
-      `@schema_prefix` to supply the spreadsheet id. (This fallback path is
-      being repaired in a later task; this moduledoc documents the option
-      surface only, not the current runtime behavior of that fallback.)
+      `@schema_prefix` to supply the spreadsheet id: `EctoGSS.Repo` falls back
+      to `__schema__(:prefix)` whenever `spreadsheet/0` returns `nil`.
+
+  `list:` has no such fallback and is always required: omitting it raises
+  `ArgumentError` when `use EctoGSS.Schema, {:model, opts}` expands.
 
   ## Compile-time vs. runtime option
 
@@ -64,30 +66,7 @@ defmodule EctoGSS.Schema do
         )
 
     for gss_column <- Keyword.get(opts, :columns, []) do
-      code =
-        quote do
-          @behaviour Ecto.Type
-          def type, do: :string
-
-          def embed_as(_format), do: :self
-
-          def equal?(value1, value1), do: true
-          def equal?(_value1, _value2), do: false
-
-          def cast(integer) when is_integer(integer), do: {:ok, to_string(integer)}
-          def cast(string) when is_bitstring(string), do: {:ok, string}
-          def cast(_), do: :error
-
-          def load(string) when is_bitstring(string), do: {:ok, string}
-
-          def dump(string) when is_bitstring(string), do: {:ok, string}
-          def dump(_), do: :error
-
-          def column, do: unquote(gss_column)
-          def list, do: unquote(list)
-          def gss_schema_type, do: true
-        end
-
+      code = column_type_ast(gss_column, list)
       safe_list_name = String.replace(list, " ", "")
 
       Module.create(
@@ -101,6 +80,52 @@ defmodule EctoGSS.Schema do
       def spreadsheet, do: unquote(spreadsheet)
       def list, do: unquote(list)
       def gss_schema, do: true
+    end
+  end
+
+  # AST for the `Ecto.Type` module generated for a single spreadsheet column, assembled from
+  # smaller fragments below (split purely to keep each fragment's clause count readable).
+  defp column_type_ast(gss_column, list) do
+    quote do
+      unquote(type_and_equality_ast())
+      unquote(cast_and_serialization_ast())
+      unquote(column_metadata_ast(gss_column, list))
+    end
+  end
+
+  # `Ecto.Type` behaviour declaration plus the `type/0`, `embed_as/1` and `equal?/2` callbacks.
+  defp type_and_equality_ast do
+    quote do
+      @behaviour Ecto.Type
+      def type, do: :string
+
+      def embed_as(_format), do: :self
+
+      def equal?(value1, value1), do: true
+      def equal?(_value1, _value2), do: false
+    end
+  end
+
+  # `cast/1`, `load/1` and `dump/1` callbacks: every generated column type stores plain strings.
+  defp cast_and_serialization_ast do
+    quote do
+      def cast(integer) when is_integer(integer), do: {:ok, to_string(integer)}
+      def cast(string) when is_bitstring(string), do: {:ok, string}
+      def cast(_), do: :error
+
+      def load(string) when is_bitstring(string), do: {:ok, string}
+
+      def dump(string) when is_bitstring(string), do: {:ok, string}
+      def dump(_), do: :error
+    end
+  end
+
+  # `column/0`, `list/0` and `gss_schema_type/0`: metadata `EctoGSS.Repo` reads back at runtime.
+  defp column_metadata_ast(gss_column, list) do
+    quote do
+      def column, do: unquote(gss_column)
+      def list, do: unquote(list)
+      def gss_schema_type, do: true
     end
   end
 

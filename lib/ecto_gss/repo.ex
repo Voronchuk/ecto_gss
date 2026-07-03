@@ -229,7 +229,7 @@ defmodule EctoGSS.Repo do
     |> raise_if_changeset_errors("delete")
   end
 
-  @spec response_values_by_opts(:rows | :range, module(), [map()], Keyword.t()) :: [
+  @spec response_values_by_opts(:rows | :range, module(), [[String.t()] | nil], Keyword.t()) :: [
           Ecto.Schema.t()
         ]
   defp response_values_by_opts(:rows, schema, data, opts) do
@@ -246,7 +246,8 @@ defmodule EctoGSS.Repo do
     |> Enum.filter(&(&1 != nil))
   end
 
-  @spec from_spreadsheet_rows(module(), {map(), integer()}) :: Ecto.Schema.t() | nil
+  @spec from_spreadsheet_rows(module(), {[String.t()] | nil, String.t() | integer()}) ::
+          Ecto.Schema.t() | nil
   defp from_spreadsheet_rows(schema, {row, id}) do
     if row != nil do
       from_spreadsheet_row_values(schema, row, id)
@@ -268,7 +269,7 @@ defmodule EctoGSS.Repo do
     end
   end
 
-  @spec to_ecto_record(map(), module(), integer()) :: Ecto.Schema.t()
+  @spec to_ecto_record(map(), module(), String.t() | integer()) :: Ecto.Schema.t()
   defp to_ecto_record(letter_map_values, schema, id) do
     instruction = get_schema_fields_types(schema)
 
@@ -303,12 +304,10 @@ defmodule EctoGSS.Repo do
     instruction = get_schema_fields_types(model)
 
     Enum.reduce(instruction, %{}, fn {key, maybe_column_type}, acc ->
-      cond do
-        gss_schema_type_module?(maybe_column_type) ->
-          Map.put(acc, maybe_column_type.column(), Map.get(record, key))
-
-        true ->
-          acc
+      if gss_schema_type_module?(maybe_column_type) do
+        Map.put(acc, maybe_column_type.column(), Map.get(record, key))
+      else
+        acc
       end
     end)
   end
@@ -330,27 +329,26 @@ defmodule EctoGSS.Repo do
 
     index =
       Enum.reduce(instruction, 0, fn {_key, maybe_column_type}, old_index ->
-        cond do
-          gss_schema_type_module?(maybe_column_type) ->
-            column_letter = maybe_column_type.column()
-
-            current_index =
-              Enum.find_index(@columns, fn letter ->
-                letter == column_letter
-              end)
-
-            if current_index != nil and current_index > old_index do
-              current_index
-            else
-              old_index
-            end
-
-          true ->
-            old_index
-        end
+        max_column_index(maybe_column_type, old_index)
       end)
 
     index + 1
+  end
+
+  @spec max_column_index(module(), integer()) :: integer()
+  defp max_column_index(maybe_column_type, old_index) do
+    if gss_schema_type_module?(maybe_column_type) do
+      column_letter = maybe_column_type.column()
+      current_index = Enum.find_index(@columns, fn letter -> letter == column_letter end)
+
+      if current_index != nil and current_index > old_index do
+        current_index
+      else
+        old_index
+      end
+    else
+      old_index
+    end
   end
 
   @spec get_spreadsheet_pid(Ecto.Changeset.t() | module()) ::
@@ -427,18 +425,17 @@ defmodule EctoGSS.Repo do
   end
 
   @spec rows_by_params(pid(), integer(), Keyword.t()) ::
-          {:rows, {:ok, [map()]}} | {:range, {:ok, [map()]}}
+          {:rows, {:ok, [[String.t()]]} | {:error, Exception.t()}}
+          | {:range, {:ok, [[String.t()]]} | {:error, atom()}}
   defp rows_by_params(pid, index, opts) do
     rows = Keyword.get(opts, :rows)
     start_id = Keyword.get(opts, :start_id, 1)
     end_id = Keyword.get(opts, :end_id, 100)
 
-    cond do
-      rows != nil ->
-        {:rows, GSS.Spreadsheet.read_rows(pid, rows, column_to: index)}
-
-      true ->
-        {:range, GSS.Spreadsheet.read_rows(pid, start_id, end_id, column_to: index)}
+    if rows != nil do
+      {:rows, GSS.Spreadsheet.read_rows(pid, rows, column_to: index)}
+    else
+      {:range, GSS.Spreadsheet.read_rows(pid, start_id, end_id, column_to: index)}
     end
   end
 
