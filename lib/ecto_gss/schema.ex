@@ -1,4 +1,57 @@
 defmodule EctoGSS.Schema do
+  @moduledoc """
+  Injects the plumbing that lets an `Ecto.Schema` be backed by a Google
+  Spreadsheet list (tab).
+
+  ## Usage
+
+      defmodule MyApp.Account do
+        use EctoGSS.Schema, {
+          :model,
+          columns: ["A", "Y"],
+          list: "All Accounts",
+          spreadsheet: "1h85keViqbRzgTN245gEw5s9roxpaUtT7i-mNXQtT8qQ"
+        }
+
+        use Ecto.Schema
+
+        schema "accounts" do
+          field(:nickname, EctoGSS.Schema.AllAccounts.A)
+          field(:email, EctoGSS.Schema.AllAccounts.Y)
+        end
+      end
+
+  `use EctoGSS.Schema, {:model, opts}` generates, at compile time:
+
+    * one `Ecto.Type` module per entry in `columns:`, named
+      `EctoGSS.Schema.<ListNameWithoutSpaces>.<Column>` (spaces in `list:` are
+      stripped to build the module name, e.g. list `"All Accounts"` and column
+      `"A"` produce `EctoGSS.Schema.AllAccounts.A`). Each generated type module
+      knows the spreadsheet column letter it maps to and is meant to be used as
+      the type of a field in the host schema's own `schema/2` block;
+    * `spreadsheet/0`, `list/0` and `gss_schema/0` functions injected into the
+      host schema module, used by `EctoGSS.Repo` to locate the backing sheet
+      and mark the module as a GSS-backed schema.
+
+  ## Locating the spreadsheet
+
+  There are two ways to tell `EctoGSS.Repo` which spreadsheet and list to use:
+
+    * pass `spreadsheet:` (and `list:`) explicitly in `opts`, as shown above; or
+    * omit `spreadsheet:` and instead rely on the host schema's
+      `@schema_prefix` to supply the spreadsheet id. (This fallback path is
+      being repaired in a later task; this moduledoc documents the option
+      surface only, not the current runtime behavior of that fallback.)
+
+  ## Compile-time vs. runtime option
+
+  `list:` and `columns:` must be compile-time literals: they are used to name
+  the generated `Ecto.Type` modules while this macro is expanding, so their
+  values must be known then. `spreadsheet:`, on the other hand, is only
+  unquoted into the generated `spreadsheet/0` function body and may be any
+  expression valid in the host module (e.g. a module attribute or a call).
+  """
+
   def model(opts) do
     spreadsheet = Keyword.get(opts, :spreadsheet)
     list = Keyword.get(opts, :list)

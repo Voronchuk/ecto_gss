@@ -3,13 +3,8 @@ defmodule EctoGSS.Repo do
   Repository to use Google Spreadsheets as persistence layer for objects.
   """
 
-  use GenServer
   import Ecto.Changeset
   require Logger
-
-  @typedoc """
-  """
-  @type state :: map()
 
   @type ecto_object :: Ecto.Changeset.t() | Ecto.Schema.t()
   @type result :: {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
@@ -42,17 +37,6 @@ defmodule EctoGSS.Repo do
     "Y",
     "Z"
   ]
-
-  @spec start_link() :: {:ok, pid}
-  def start_link do
-    initial_state = %{}
-    GenServer.start_link(__MODULE__, initial_state, name: __MODULE__)
-  end
-
-  @spec init(state) :: {:ok, state}
-  def init(state) do
-    {:ok, state}
-  end
 
   @doc """
   Get several records:
@@ -103,7 +87,7 @@ defmodule EctoGSS.Repo do
   Get a record by row, raise if not found.
   """
   @spec get!(Ecto.Queryable.t(), integer() | nil) :: Ecto.Schema.t() | no_return
-  def get!(_schema, nil), do: raise(Ecto.NoResultsError, message: "no results found")
+  def get!(schema, nil), do: raise(Ecto.NoResultsError, queryable: schema)
 
   def get!(schema, id) when is_atom(schema) do
     raise_if_no_results(schema, get(schema, id))
@@ -292,7 +276,7 @@ defmodule EctoGSS.Repo do
         key == :id ->
           Map.put(record, key, id)
 
-        is_gss_schema_type_module?(maybe_column_type) ->
+        gss_schema_type_module?(maybe_column_type) ->
           value = Map.get(letter_map_values, maybe_column_type.column())
           Map.put(record, key, value)
 
@@ -319,7 +303,7 @@ defmodule EctoGSS.Repo do
 
     Enum.reduce(instruction, %{}, fn {key, maybe_column_type}, acc ->
       cond do
-        is_gss_schema_type_module?(maybe_column_type) ->
+        gss_schema_type_module?(maybe_column_type) ->
           Map.put(acc, maybe_column_type.column(), Map.get(record, key))
 
         true ->
@@ -346,7 +330,7 @@ defmodule EctoGSS.Repo do
     index =
       Enum.reduce(instruction, 0, fn {_key, maybe_column_type}, old_index ->
         cond do
-          is_gss_schema_type_module?(maybe_column_type) ->
+          gss_schema_type_module?(maybe_column_type) ->
             column_letter = maybe_column_type.column()
 
             current_index =
@@ -374,7 +358,7 @@ defmodule EctoGSS.Repo do
   end
 
   defp get_spreadsheet_pid(schema) when is_atom(schema) do
-    if is_gss_schema_module?(schema) do
+    if gss_schema_module?(schema) do
       get_spreadsheet_pid(schema.spreadsheet(), schema.list())
     else
       :invalid_record
@@ -416,15 +400,14 @@ defmodule EctoGSS.Repo do
     data.__struct__.list() || data.__struct__(:source)
   end
 
-  @spec is_gss_schema_module?(module()) :: boolean()
-  defp is_gss_schema_module?(schema) do
-    Code.ensure_loaded?(schema) and {:gss_schema, 0} in schema.module_info(:exports)
+  @spec gss_schema_module?(module()) :: boolean()
+  defp gss_schema_module?(schema) do
+    Code.ensure_loaded?(schema) and function_exported?(schema, :gss_schema, 0)
   end
 
-  @spec is_gss_schema_type_module?(module()) :: boolean()
-  defp is_gss_schema_type_module?(gss_schema_type) do
-    Code.ensure_loaded?(gss_schema_type) and
-      {:gss_schema_type, 0} in gss_schema_type.module_info(:exports)
+  @spec gss_schema_type_module?(module()) :: boolean()
+  defp gss_schema_type_module?(type) do
+    Code.ensure_loaded?(type) and function_exported?(type, :gss_schema_type, 0)
   end
 
   @spec rows_by_params(pid(), integer(), Keyword.t()) ::
